@@ -52,8 +52,8 @@
   },
 
   "scripts": {
-    "build": "cd workspace/projects/hello-world && npm install --include=dev",
-    "start": "cd workspace/projects/hello-world && npx vite --host 0.0.0.0"
+    "build": "cd projects/hello-world && npm install --include=dev",
+    "start": "cd projects/hello-world && npx vite --host 0.0.0.0"
   },
 
   "routes": [
