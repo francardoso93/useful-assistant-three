@@ -2,14 +2,14 @@
   "version": 1,
 
   "agent": {
-    "name": "Useful Assistant Three",
+    "name": "Useful Assistant Four",
     "description": "A personal AI assistant that's actually helpful. Reads files, searches the web, manages memory, and gets things done without asking unnecessary questions.",
     "vibe": "resourceful, opinionated, gets things done",
     "emoji": "🧠"
   },
 
   "template": {
-    "slug": "useful-assistant-three",
+    "slug": "useful-assistant-four",
     "category": "general",
     "tags": ["assistant", "personal", "productivity", "general"],
     "partnerName": "Pinata"
