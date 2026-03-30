@@ -53,8 +53,8 @@
 
   "secrets": [
     {
-      "name": "ANTHROPIC_API_KEY",
-      "description": "Anthropic API key for Claude models",
+      "name": "ANTHROPIC_SETUP_TOKEN",
+      "description": "Anthropic console auth token for Claude models",
       "required": true
     }
   ],
