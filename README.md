@@ -1,16 +1,17 @@
 # OpenClaw Agent Template
 
-> **This is a base template.** It is intentionally generic. Clone it and customize it to build _your_ agent — a frontend dev, a data pipeline monitor, a personal assistant, a Discord bot, whatever you want. Do NOT treat this as a finished agent or specialize it in place.
+> **This is a base template.** It is intentionally generic. Clone it and customize it to build _your_ agent — a frontend dev, a data pipeline monitor, a personal assistant, a Discord bot, whatever you want. Do NOT treat this as a finished agent or specialize it in place. Do NOT change the personality, soul, or identity files to match a specific use case — those are for the end user to fill in.
 
 ## What This Is
 
 A vanilla starting point for building agents on [Pinata Agents](https://agents.pinata.cloud). It provides:
 
-- A documented `manifest.json` with every available option explained
+- A documented `manifest.json` with every available option explained in `_docs`
 - A workspace structure with personality, memory, and safety conventions
 - A bootstrap flow so the agent figures out who it is on first run
+- A working example server (`workspace/server/`) showing how scripts, routes, and tasks wire together
 
-**What this is NOT:** a specific agent. The placeholder name, description, and personality are examples. Replace them.
+**What this is NOT:** a specific agent. The agent name, description, personality, and example server are placeholders. Replace them with your own.
 
 ## Structure
 
@@ -24,8 +25,13 @@ workspace/
   USER.md                    # Notes about the human (learned over time)
   TOOLS.md                   # Environment-specific notes
   HEARTBEAT.md               # Periodic tasks (empty by default)
-  projects/
-    starter/                 # Example Vite + React + TS app (wired to scripts & routes)
+  server/                    # Example Express server — replace with your own app
+    src/
+      index.ts               # Health endpoint + dashboard page
+      dashboard.html         # Minimal status page
+    ecosystem.config.js      # pm2 process config
+    package.json
+    tsconfig.json
 ```
 
 ## Manifest Options
@@ -35,10 +41,9 @@ The `manifest.json` includes a `_docs` block documenting every available field. 
 | Section      | What it does                                                                 |
 | ------------ | ---------------------------------------------------------------------------- |
 | **agent**    | Name, description, vibe, emoji                                               |
-| **model**    | Default AI model                                                             |
 | **secrets**  | Encrypted API keys and credentials                                           |
 | **skills**   | Attachable skill packages from ClawHub (max 20)                              |
-| **tasks**    | Cron-scheduled prompts (max 20)                                              |
+| **tasks**    | Scheduled prompts — cron (`'0 9 * * *'`) or milliseconds (`'600000ms'`)      |
 | **scripts**  | Lifecycle hooks — `build` runs after git push, `start` runs on agent boot    |
 | **routes**   | Port forwarding for web apps/APIs (max 10)                                   |
 | **channels** | Telegram, Discord, Slack configuration                                       |
@@ -46,26 +51,36 @@ The `manifest.json` includes a `_docs` block documenting every available field. 
 
 Remove the `_docs` block before submitting to the marketplace.
 
-## Serving a Web App (Scripts + Routes)
+## Serving a Web App (Scripts + Routes + Tasks)
 
-If your agent runs a server, API, or frontend dev server, you need two things in `manifest.json`:
+This template includes a working example. Here's how the pieces connect:
 
-1. **`scripts`** — lifecycle hooks that install deps and start the server
-2. **`routes`** — port forwarding rules that expose the server to the internet
+**`scripts`** handle the lifecycle:
+- `build` runs after every git push — installs deps and compiles TypeScript
+- `start` runs on agent boot — launches the server via pm2
 
-Example from a Vite + React agent:
+**`routes`** expose the server to the internet:
+- Maps port 3000 to the `/dashboard` URL path
+- `protected: false` makes it publicly accessible (set `true` to require auth)
+
+**`tasks`** keep things healthy:
+- A health-check task runs every 10 minutes and restarts the server if it's down
+- Schedule supports both cron expressions (`'0 9 * * *'`) and milliseconds (`'600000ms'`)
 
 ```json
 {
   "scripts": {
-    "build": "cd workspace/projects/myapp && npm install --include=dev",
-    "start": "cd workspace/projects/myapp && npx vite --host 0.0.0.0"
+    "build": "cd ./workspace/server && npm install --include=dev && npm run build",
+    "start": "cd ./workspace/server && ./node_modules/.bin/pm2 start ecosystem.config.js"
   },
   "routes": [
+    { "port": 3000, "path": "/dashboard", "protected": false }
+  ],
+  "tasks": [
     {
-      "port": 5173,
-      "path": "/app",
-      "protected": false
+      "name": "health-check",
+      "prompt": "Run curl -sf http://localhost:3000/health to check if the server is up. If it fails, restart it. Reply with: OK, RESTARTED, or FAILED.",
+      "schedule": "600000ms"
     }
   ]
 }
@@ -73,33 +88,13 @@ Example from a Vite + React agent:
 
 **Important details:**
 
-- `build` runs after every git push — use it to install dependencies or compile assets
-- `start` runs on agent boot — use it to launch your server or long-running process
 - Your server **must bind to `0.0.0.0`**, not `localhost`, or it won't be reachable
-- Set `protected: false` for public routes, or `true` (default) to require auth
-- Use `__AGENT_HOST__` as a placeholder in config files — it gets replaced at runtime with the agent's public hostname
-- For WebSocket/HMR setups (e.g. Vite), connect via WSS on port 443 through `__AGENT_HOST__`
-
-Example Vite config using the host placeholder:
-
-```ts
-export default defineConfig({
-  base: "/app",
-  server: {
-    host: "0.0.0.0",
-    allowedHosts: ["__AGENT_HOST__"],
-    hmr: {
-      host: "__AGENT_HOST__",
-      protocol: "wss",
-      clientPort: 443,
-    },
-  },
-});
-```
+- Use pm2 (`ecosystem.config.js`) to manage the process — it handles restarts and logs
+- The example server has a `/health` endpoint the watchdog task checks
 
 ## How to Use
 
 1. Import this repo when creating an agent on [Pinata Agents](https://agents.pinata.cloud)
-2. Edit `manifest.json` — change the agent name, description, tags, and add any options you need (scripts, routes, channels, etc.)
+2. Edit `manifest.json` — change the agent name, description, tags, secrets, and configure scripts/routes/tasks for your use case
 3. Edit the workspace files — give your agent a personality, tools, and purpose
-4. If your agent runs a server or app, add `scripts` and `routes` as shown above
+4. Replace `workspace/server/` with your own app, or remove it if your agent doesn't need a server
