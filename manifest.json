@@ -2,14 +2,14 @@
   "version": 1,
 
   "agent": {
-    "name": "Useful Assistant Seven",
+    "name": "Useful Assistant Eight",
     "description": "A personal AI assistant that's actually helpful. Reads files, searches the web, manages memory, and gets things done without asking unnecessary questions.",
     "vibe": "resourceful, opinionated, gets things done",
     "emoji": "🧠"
   },
 
   "template": {
-    "slug": "useful-assistant-seven",
+    "slug": "useful-assistant-eight",
     "category": "general",
     "tags": ["assistant", "personal", "productivity", "general"],
     "partnerName": "Pinata"
@@ -52,8 +52,8 @@
   },
 
   "scripts": {
-    "build": "cd projects/hello-world && npm install --include=dev",
-    "start": "cd projects/hello-world && npx vite --host 0.0.0.0"
+    "build": "cd workspace/projects/hello-world && npm install --include=dev",
+    "start": "cd workspace/projects/hello-world && npx vite --host 0.0.0.0"
   },
 
   "routes": [
