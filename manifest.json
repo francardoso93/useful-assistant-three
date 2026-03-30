@@ -60,22 +60,14 @@
   ],
 
   "scripts": {
-    "build": "cd ./workspace/server && npm install --include=dev && npm run build",
-    "start": "cd ./workspace/server && ./node_modules/.bin/pm2 start ecosystem.config.js"
+    "build": "cd workspace/projects/hello-world && npm install --include=dev",
+    "start": "cd workspace/projects/hello-world && npx vite --host 0.0.0.0"
   },
-
-  "tasks": [
-    {
-      "name": "health-check",
-      "prompt": "Run `curl -sf http://localhost:3000/health` to check if the server is up. If it fails, run `cd /home/node/clawd/workspace/server && ./node_modules/.bin/pm2 resurrect || ./node_modules/.bin/pm2 start ecosystem.config.js` to restart it. Reply with a short status: OK, RESTARTED, or FAILED.",
-      "schedule": "600000ms"
-    }
-  ],
 
   "routes": [
     {
-      "port": 3000,
-      "path": "/dashboard",
+      "port": 5173,
+      "path": "/app",
       "protected": false
     }
   ]
